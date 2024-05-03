@@ -10,5 +10,10 @@
         <attr name="slider_to_progress" format="float" />
         <attr name="slider_min_value" format="float" />
         <attr name="slider_max_value" format="float" />
+
+        <attr name="thumb_size" format="dimension" />
+        <attr name="thumb_color" format="color" />
+        <attr name="thumb_second_color" format="color" />
+        <attr name="thumb_single_color" format="boolean" />
     </declare-styleable>
 </resources>

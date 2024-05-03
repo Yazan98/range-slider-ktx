@@ -2,4 +2,5 @@
 <resources>
     <color name="background_color">#D7D7D7</color>
     <color name="active_color">#EF5C5C</color>
+    <color name="background_color_screen">#FFFFFF</color>
 </resources>

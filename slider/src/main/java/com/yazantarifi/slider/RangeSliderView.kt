@@ -13,6 +13,7 @@ class RangeSliderView: View {
     companion object {
         private const val DEFAULT_CORNER_RADIUS_BACKGROUND = 20f
         private const val DEFAULT_RECTANGLE_HEIGHT = 30f
+        private const val DEFAULT_THUMB_SIZE = 20f
 
         private const val DEFAULT_SLIDER_FROM_PROGRESS = 0f
         private const val DEFAULT_SLIDER_TO_PROGRESS = 100f
@@ -31,6 +32,11 @@ class RangeSliderView: View {
     private var sliderMinimumValue: Float = 0f
     private var sliderMaximumValue: Float = 0f
 
+    private var thumbColor: Color? = null
+    private var thumbSecondColor: Color? = null
+    private var thumbSize: Float = 0f
+    private var isThumbSingleColor: Boolean = false
+
     /**
      * Background Color Rectangle Only Attributes
      * View Attributes to Draw and ReDraw
@@ -39,7 +45,6 @@ class RangeSliderView: View {
     private var backgroundColorPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var backgroundColorPath = Path()
 
-
     /**
      * Active Progress Rectangle Color Attributes
      * View Attributes to Draw and ReDraw
@@ -47,6 +52,16 @@ class RangeSliderView: View {
      */
     private var activeProgressColorPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var activeProgressColorPath = Path()
+
+    /**
+     * Active Thumbs Attributes
+     * 1. From Thumb
+     * 2. To Thumb
+     */
+    private var fromThumbPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var fromThumbSecondPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var toThumbPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var toThumbSecondPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     constructor(context: Context) : super(context) {
         initViewAttributes(context, null)
@@ -72,6 +87,108 @@ class RangeSliderView: View {
 
         // 2. Draw the Selected Progress in Active Color Based on Progress
         onDrawActiveProgressColors(canvas)
+
+        // 3. Draw the Thumbs By Active Progress
+        if (isThumbSingleColor) {
+            onDrawSingleColorFromThumb(canvas)
+            onDrawSingleColorToThumb(canvas)
+        } else {
+            onDrawMultipleColorFromThumb(canvas)
+            onDrawMultipleColorToThumb(canvas)
+        }
+    }
+
+    private fun onDrawSingleColorFromThumb(canvas: Canvas) {
+        // Calculate the width of the foreground rectangle based on progress percentage
+        val minimumProgressWidth = width * ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue))
+
+        thumbColor?.let {
+            thumbColor?.toArgb()?.let { fromThumbPaint.setColor(it) }
+            fromThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(minimumProgressWidth, getCenterPosition(), thumbSize, fromThumbPaint)
+    }
+
+    private fun onDrawMultipleColorFromThumb(canvas: Canvas) {
+        // Calculate the width of the foreground rectangle based on progress percentage
+        val minimumProgressWidth = width * ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue))
+
+        fromThumbSecondPaint?.let {
+            thumbSecondColor?.toArgb()?.let { fromThumbSecondPaint.setColor(it) }
+            toThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(minimumProgressWidth, getCenterPosition(), thumbSize + 5, fromThumbSecondPaint)
+
+        thumbColor?.let {
+            thumbColor?.toArgb()?.let { fromThumbPaint.setColor(it) }
+            fromThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(minimumProgressWidth, getCenterPosition(), thumbSize, fromThumbPaint)
+
+        fromThumbSecondPaint?.let {
+            thumbSecondColor?.toArgb()?.let { fromThumbSecondPaint.setColor(it) }
+            fromThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(minimumProgressWidth, getCenterPosition(), thumbSize - 5, fromThumbSecondPaint)
+
+        thumbColor?.let {
+            thumbColor?.toArgb()?.let { fromThumbPaint.setColor(it) }
+            fromThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(minimumProgressWidth, getCenterPosition(), thumbSize - 10, fromThumbPaint)
+    }
+
+    private fun onDrawMultipleColorToThumb(canvas: Canvas) {
+        // Calculate the width of the foreground rectangle based on progress percentage
+        val maximumProgressIndex = (sliderToProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue) * 100
+        val maximumProgressWidth = width * (maximumProgressIndex / 100)
+
+        toThumbSecondPaint?.let {
+            thumbSecondColor?.toArgb()?.let { toThumbSecondPaint.setColor(it) }
+            toThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(maximumProgressWidth, getCenterPosition(), thumbSize + 5, toThumbSecondPaint)
+
+        thumbColor?.let {
+            thumbColor?.toArgb()?.let { toThumbPaint.setColor(it) }
+            toThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(maximumProgressWidth, getCenterPosition(), thumbSize, toThumbPaint)
+
+        toThumbSecondPaint?.let {
+            thumbSecondColor?.toArgb()?.let { toThumbSecondPaint.setColor(it) }
+            fromThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(maximumProgressWidth, getCenterPosition(), thumbSize - 5, fromThumbSecondPaint)
+
+        thumbColor?.let {
+            thumbColor?.toArgb()?.let { toThumbPaint.setColor(it) }
+            toThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(maximumProgressWidth, getCenterPosition(), thumbSize - 10, toThumbPaint)
+
+    }
+
+    private fun onDrawSingleColorToThumb(canvas: Canvas) {
+        // Calculate the width of the foreground rectangle based on progress percentage
+        val maximumProgressIndex = (sliderToProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue) * 100
+        val maximumProgressWidth = width * (maximumProgressIndex / 100)
+
+        thumbColor?.let {
+            thumbColor?.toArgb()?.let { toThumbPaint.setColor(it) }
+            toThumbPaint.style = Paint.Style.FILL
+        }
+
+        canvas.drawCircle(maximumProgressWidth, getCenterPosition(), thumbSize, toThumbPaint)
     }
 
     private fun onDrawActiveProgressColors(canvas: Canvas) {
@@ -88,7 +205,7 @@ class RangeSliderView: View {
         val minimumProgressWidth = width * ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue))
 
         // Draw the new active color coordinates based on the colors
-        activeProgressColorPath.addRoundRect(minimumProgressWidth, 0f, maximumProgressWidth, rectangleHeight, backgroundRadius, backgroundRadius, Path.Direction.CW)
+        activeProgressColorPath.addRoundRect(minimumProgressWidth, (height / 2) - (rectangleHeight / 2), maximumProgressWidth, (height / 2) + (rectangleHeight / 2), backgroundRadius, backgroundRadius, Path.Direction.CW)
 
         // Add the active color to the Paint based on the progress
         sliderActiveColor?.toArgb()?.let { activeProgressColorPaint.setColor(it) }
@@ -103,7 +220,7 @@ class RangeSliderView: View {
 
         // remove All Prev Paths and Add New Rect Based on the New Coordinates
         backgroundColorPath.reset()
-        backgroundColorPath.addRoundRect(0f, 0f, width, rectangleHeight, backgroundRadius, backgroundRadius, Path.Direction.CW)
+        backgroundColorPath.addRoundRect(0f, (height / 2) - (rectangleHeight / 2), width, (height / 2) + (rectangleHeight / 2), backgroundRadius, backgroundRadius, Path.Direction.CW)
 
         // Add the Background Color to the Paint
         backgroundColor?.toArgb()?.let { backgroundColorPaint.setColor(it) }
@@ -115,10 +232,14 @@ class RangeSliderView: View {
 
     private fun getViewAttributes(context: Context, attrs: AttributeSet) {
         val types = context.obtainStyledAttributes(attrs, R.styleable.RangeSliderView, 0, 0)
+        thumbColor = Color.valueOf(types.getColor(R.styleable.RangeSliderView_thumb_color, context.getColor(R.color.active_color)))
+        thumbSecondColor = Color.valueOf(types.getColor(R.styleable.RangeSliderView_thumb_second_color, context.getColor(R.color.background_color_screen)))
         backgroundColor = Color.valueOf(types.getColor(R.styleable.RangeSliderView_slider_background, context.getColor(R.color.background_color)))
         sliderActiveColor = Color.valueOf(types.getColor(R.styleable.RangeSliderView_slider_active_color, context.getColor(R.color.active_color)))
         backgroundRadius = types.getDimension(R.styleable.RangeSliderView_corner_radius, DEFAULT_CORNER_RADIUS_BACKGROUND)
         rectangleHeight = types.getDimension(R.styleable.RangeSliderView_rectangle_height, DEFAULT_RECTANGLE_HEIGHT)
+        thumbSize = types.getDimension(R.styleable.RangeSliderView_thumb_size, DEFAULT_THUMB_SIZE)
+        isThumbSingleColor = types.getBoolean(R.styleable.RangeSliderView_thumb_single_color, false)
 
         sliderFromProgress = types.getFloat(R.styleable.RangeSliderView_slider_from_progress, DEFAULT_SLIDER_FROM_PROGRESS)
         sliderToProgress = types.getFloat(R.styleable.RangeSliderView_slider_to_progress, DEFAULT_SLIDER_TO_PROGRESS)
@@ -130,16 +251,24 @@ class RangeSliderView: View {
     }
 
     private fun getDefaultViewAttributes(context: Context) {
+        thumbSecondColor = Color.valueOf(context.getColor(R.color.background_color_screen))
         backgroundColor = Color.valueOf(context.getColor(R.color.background_color))
         sliderActiveColor = Color.valueOf(context.getColor(R.color.active_color))
+        thumbColor = Color.valueOf(context.getColor(R.color.active_color))
         backgroundRadius = DEFAULT_CORNER_RADIUS_BACKGROUND
         rectangleHeight = DEFAULT_RECTANGLE_HEIGHT
+        thumbSize = DEFAULT_THUMB_SIZE
+        isThumbSingleColor = false
 
         sliderFromProgress = DEFAULT_SLIDER_FROM_PROGRESS
         sliderToProgress = DEFAULT_SLIDER_TO_PROGRESS
 
         sliderMinimumValue = DEFAULT_SLIDER_FROM_PROGRESS
         sliderMaximumValue = DEFAULT_SLIDER_TO_PROGRESS
+    }
+
+    private fun getCenterPosition(): Float {
+        return (height / 2).toFloat()
     }
 
 }
