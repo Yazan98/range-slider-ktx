@@ -7,12 +7,12 @@
 
     <com.yazantarifi.slider.RangeSliderView
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="90dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:rectangle_height="15dp"
+        app:rectangle_height="13dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         app:slider_from_progress="10"

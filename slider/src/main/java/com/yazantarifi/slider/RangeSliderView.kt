@@ -1,11 +1,13 @@
 package com.yazantarifi.slider
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 
 class RangeSliderView: View {
@@ -63,6 +65,9 @@ class RangeSliderView: View {
     private var toThumbPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var toThumbSecondPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
+    private var fromThumbIndexX: Float = 0f
+    private var toThumbIndexX: Float = 0f
+
     constructor(context: Context) : super(context) {
         initViewAttributes(context, null)
     }
@@ -85,10 +90,13 @@ class RangeSliderView: View {
         // 1. Draw the Background Rectangle
         onDrawBackgroundRectangle(canvas)
 
-        // 2. Draw the Selected Progress in Active Color Based on Progress
+        // 2. Init Thumbs Positions
+        onInitThumbsPositions()
+
+        // 3. Draw the Selected Progress in Active Color Based on Progress
         onDrawActiveProgressColors(canvas)
 
-        // 3. Draw the Thumbs By Active Progress
+        // 4. Draw the Thumbs By Active Progress
         if (isThumbSingleColor) {
             onDrawSingleColorFromThumb(canvas)
             onDrawSingleColorToThumb(canvas)
@@ -96,6 +104,69 @@ class RangeSliderView: View {
             onDrawMultipleColorFromThumb(canvas)
             onDrawMultipleColorToThumb(canvas)
         }
+    }
+
+    private fun onInitThumbsPositions() {
+        if (fromThumbIndexX <= 0f) {
+            fromThumbIndexX = getFromThumbIndex()
+        }
+
+        if (toThumbIndexX <= 0f) {
+            toThumbIndexX = getToThumbIndex()
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val eventValue = super.onTouchEvent(event)
+
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                val isFromCircleTouched = isCircleTouched(event, fromThumbIndexX)
+                val isToCircleTouched = isCircleTouched(event, toThumbIndexX)
+
+                if (!isFromCircleTouched && !isToCircleTouched) {
+                    val newXPosition = event.x
+                    if (newXPosition <= (width / 2)) {
+                        fromThumbIndexX = newXPosition
+                    } else {
+                        toThumbIndexX = newXPosition
+                    }
+
+                    postInvalidate()
+                }
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                // Circles Should Move
+                val isFromCircleTouched = isCircleTouched(event, fromThumbIndexX)
+                val isToCircleTouched = isCircleTouched(event, toThumbIndexX)
+                if (isFromCircleTouched) {
+                    fromThumbIndexX = event.x
+                }
+
+                if (isToCircleTouched) {
+                    toThumbIndexX = event.x
+                }
+
+                postInvalidate()
+
+                return true
+            }
+        }
+
+        return eventValue
+    }
+
+    private fun isCircleTouched(event: MotionEvent, circleX: Float): Boolean {
+        val newXPosition = event.x
+        val newYPosition = event.y
+
+        val dx = Math.pow((newXPosition - circleX).toDouble(), 2.0)
+        val dy = Math.pow((newYPosition - getCenterPosition()).toDouble(), 2.0)
+
+        return dx + dy < Math.pow(thumbSize.toDouble(), 2.0)
     }
 
     private fun getFromThumbIndex(): Float {
@@ -109,7 +180,7 @@ class RangeSliderView: View {
             fromThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getFromThumbIndex(), getCenterPosition(), thumbSize, fromThumbPaint)
+        canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize, fromThumbPaint)
     }
 
     private fun onDrawMultipleColorFromThumb(canvas: Canvas) {
@@ -118,28 +189,28 @@ class RangeSliderView: View {
             toThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getFromThumbIndex(), getCenterPosition(), thumbSize + 5, fromThumbSecondPaint)
+        canvas.drawCircle(fromThumbIndexX, getCenterPosition(), thumbSize + 5, fromThumbSecondPaint)
 
         thumbColor?.let {
             thumbColor?.toArgb()?.let { fromThumbPaint.setColor(it) }
             fromThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getFromThumbIndex(), getCenterPosition(), thumbSize, fromThumbPaint)
+        canvas.drawCircle(fromThumbIndexX, getCenterPosition(), thumbSize, fromThumbPaint)
 
         fromThumbSecondPaint?.let {
             thumbSecondColor?.toArgb()?.let { fromThumbSecondPaint.setColor(it) }
             fromThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getFromThumbIndex(), getCenterPosition(), thumbSize - 5, fromThumbSecondPaint)
+        canvas.drawCircle(fromThumbIndexX, getCenterPosition(), thumbSize - 5, fromThumbSecondPaint)
 
         thumbColor?.let {
             thumbColor?.toArgb()?.let { fromThumbPaint.setColor(it) }
             fromThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getFromThumbIndex(), getCenterPosition(), thumbSize - 10, fromThumbPaint)
+        canvas.drawCircle(fromThumbIndexX, getCenterPosition(), thumbSize - 10, fromThumbPaint)
     }
 
     private fun getToThumbIndex(): Float {
@@ -155,28 +226,28 @@ class RangeSliderView: View {
             toThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getToThumbIndex(), getCenterPosition(), thumbSize + 5, toThumbSecondPaint)
+        canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize + 5, toThumbSecondPaint)
 
         thumbColor?.let {
             thumbColor?.toArgb()?.let { toThumbPaint.setColor(it) }
             toThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getToThumbIndex(), getCenterPosition(), thumbSize, toThumbPaint)
+        canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize, toThumbPaint)
 
         toThumbSecondPaint?.let {
             thumbSecondColor?.toArgb()?.let { toThumbSecondPaint.setColor(it) }
             fromThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getToThumbIndex(), getCenterPosition(), thumbSize - 5, fromThumbSecondPaint)
+        canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize - 5, fromThumbSecondPaint)
 
         thumbColor?.let {
             thumbColor?.toArgb()?.let { toThumbPaint.setColor(it) }
             toThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getToThumbIndex(), getCenterPosition(), thumbSize - 10, toThumbPaint)
+        canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize - 10, toThumbPaint)
 
     }
 
@@ -186,17 +257,15 @@ class RangeSliderView: View {
             toThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(getToThumbIndex(), getCenterPosition(), thumbSize, toThumbPaint)
+        canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize, toThumbPaint)
     }
 
     private fun onDrawActiveProgressColors(canvas: Canvas) {
-        val width = width.toFloat()
-
         // Remove all previous paths and add new rectangle based on the new coordinates
         activeProgressColorPath.reset()
 
         // Draw the new active color coordinates based on the colors
-        activeProgressColorPath.addRoundRect(getFromThumbIndex(), (height / 2) - (rectangleHeight / 2), getToThumbIndex(), (height / 2) + (rectangleHeight / 2), backgroundRadius, backgroundRadius, Path.Direction.CW)
+        activeProgressColorPath.addRoundRect(fromThumbIndexX, (height / 2) - (rectangleHeight / 2), toThumbIndexX, (height / 2) + (rectangleHeight / 2), backgroundRadius, backgroundRadius, Path.Direction.CW)
 
         // Add the active color to the Paint based on the progress
         sliderActiveColor?.toArgb()?.let { activeProgressColorPaint.setColor(it) }
