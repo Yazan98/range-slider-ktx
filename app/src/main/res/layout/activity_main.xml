@@ -16,7 +16,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         app:slider_from_progress="10"
-        app:slider_to_progress="90"
+        app:slider_to_progress="100"
         app:corner_radius="30dp"
         app:thumb_size="15dp"
         app:thumb_single_color="false"

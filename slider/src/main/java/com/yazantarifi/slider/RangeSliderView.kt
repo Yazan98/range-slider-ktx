@@ -19,6 +19,7 @@ class RangeSliderView: View {
 
         private const val DEFAULT_SLIDER_FROM_PROGRESS = 0f
         private const val DEFAULT_SLIDER_TO_PROGRESS = 100f
+        private const val DEFAULT_PADDING_VALUE = 45f
     }
 
     /**
@@ -127,7 +128,7 @@ class RangeSliderView: View {
 
                 if (!isFromCircleTouched && !isToCircleTouched) {
                     val newXPosition = event.x
-                    if (newXPosition <= (width / 2)) {
+                    if (newXPosition <= (getViewWidth() / 2)) {
                         fromThumbIndexX = newXPosition
                     } else {
                         toThumbIndexX = newXPosition
@@ -144,12 +145,15 @@ class RangeSliderView: View {
                 val isToCircleTouched = isCircleTouched(event, toThumbIndexX)
                 if (isFromCircleTouched) {
                     fromThumbIndexX = event.x
+                    sliderFromProgress = getProgressValueByXCoordinates(fromThumbIndexX)
+                    onValidateThumbsPositions(true, false)
                 }
 
                 if (isToCircleTouched) {
                     toThumbIndexX = event.x
+                    sliderToProgress = getProgressValueByXCoordinates(toThumbIndexX)
+                    onValidateThumbsPositions(false, true)
                 }
-
                 postInvalidate()
 
                 return true
@@ -157,6 +161,40 @@ class RangeSliderView: View {
         }
 
         return eventValue
+    }
+
+    private fun onValidateThumbsPositions(isFromValidation: Boolean, isToValidation: Boolean) {
+        if (isFromValidation) {
+            if (fromThumbIndexX >= toThumbIndexX) {
+                fromThumbIndexX = toThumbIndexX
+            }
+
+            if (sliderFromProgress >= sliderToProgress) {
+                sliderFromProgress = sliderToProgress
+            }
+        }
+
+        if (isToValidation) {
+            if (toThumbIndexX <= fromThumbIndexX) {
+                toThumbIndexX = fromThumbIndexX
+            }
+
+            if (sliderToProgress <= sliderFromProgress) {
+                sliderToProgress = sliderFromProgress
+            }
+        }
+
+        if (sliderToProgress >= sliderMaximumValue) {
+            sliderToProgress = sliderMaximumValue
+        }
+
+        if (sliderFromProgress <= sliderMinimumValue) {
+            sliderFromProgress = sliderMinimumValue
+        }
+
+        if (toThumbIndexX >= getViewWidth()) {
+            toThumbIndexX = getViewWidth()
+        }
     }
 
     private fun isCircleTouched(event: MotionEvent, circleX: Float): Boolean {
@@ -171,7 +209,7 @@ class RangeSliderView: View {
 
     private fun getFromThumbIndex(): Float {
         // Calculate the width of the foreground rectangle based on progress percentage
-        return width * ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue))
+        return DEFAULT_PADDING_VALUE + getViewWidth() * ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue))
     }
 
     private fun onDrawSingleColorFromThumb(canvas: Canvas) {
@@ -216,7 +254,7 @@ class RangeSliderView: View {
     private fun getToThumbIndex(): Float {
         // Calculate the width of the foreground rectangle based on progress percentage
         val maximumProgressIndex = (sliderToProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue) * 100
-        return width * (maximumProgressIndex / 100)
+        return getViewWidth() * (maximumProgressIndex / 100)
     }
 
     private fun onDrawMultipleColorToThumb(canvas: Canvas) {
@@ -276,7 +314,7 @@ class RangeSliderView: View {
     }
 
     private fun onDrawBackgroundRectangle(canvas: Canvas) {
-        val width = width.toFloat()
+        val width = getViewWidth()
 
         // remove All Prev Paths and Add New Rect Based on the New Coordinates
         backgroundColorPath.reset()
@@ -288,6 +326,18 @@ class RangeSliderView: View {
 
         // Draw the Background Path based on the Paint with the Given Color
         canvas.drawPath(backgroundColorPath, backgroundColorPaint)
+    }
+
+    private fun getProgressValueByXCoordinates(x: Float): Float {
+        // Calculate the percentage of the x coordinate relative to the width of the view
+        val width = getViewWidth()
+        val percentage = x / width
+
+        // Calculate the range of values
+        val range = sliderMaximumValue - sliderMinimumValue
+
+        // Calculate the value based on the percentage and the range
+        return (percentage * range + sliderMinimumValue)
     }
 
     private fun getViewAttributes(context: Context, attrs: AttributeSet) {
@@ -329,6 +379,10 @@ class RangeSliderView: View {
 
     private fun getCenterPosition(): Float {
         return (height / 2).toFloat()
+    }
+
+    private fun getViewWidth(): Float {
+        return width - DEFAULT_PADDING_VALUE
     }
 
 }
