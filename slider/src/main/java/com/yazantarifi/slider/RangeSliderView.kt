@@ -9,6 +9,8 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlin.math.abs
+import kotlin.math.round
 
 /**
  * This RangeSlider Will Manage 2 Points of Progress Only
@@ -34,6 +36,7 @@ class RangeSliderView: View {
         private const val DEFAULT_CORNER_RADIUS_BACKGROUND = 20f
         private const val DEFAULT_RECTANGLE_HEIGHT = 30f
         private const val DEFAULT_THUMB_SIZE = 20f
+        private const val DEFAULT_STEP_SIZE = 1f
 
         private const val DEFAULT_SLIDER_FROM_PROGRESS = 0f
         private const val DEFAULT_SLIDER_TO_PROGRESS = 100f
@@ -61,6 +64,8 @@ class RangeSliderView: View {
     private var thumbSize: Float = 0f
     private var isThumbSingleColor: Boolean = false
     private var progressListener: RangeSliderListener? = null
+    private var stepSize: Float = DEFAULT_STEP_SIZE
+    private var sliderStepsIndexes: List<Float> = arrayListOf()
 
     /**
      * Background Color Rectangle Only Attributes
@@ -90,6 +95,7 @@ class RangeSliderView: View {
 
     private var fromThumbIndexX: Float = 0f
     private var toThumbIndexX: Float = 0f
+    private var prevThumbXPosition = 0f
 
     constructor(context: Context) : super(context) {
         initViewAttributes(context, null)
@@ -169,6 +175,7 @@ class RangeSliderView: View {
 
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
+                prevThumbXPosition = event.x
                 val isFromCircleTouched = isCircleTouched(event, fromThumbIndexX)
                 val isToCircleTouched = isCircleTouched(event, toThumbIndexX)
 
@@ -194,22 +201,42 @@ class RangeSliderView: View {
                 // Circles Should Move
                 val isFromCircleTouched = isCircleTouched(event, fromThumbIndexX)
                 val isToCircleTouched = isCircleTouched(event, toThumbIndexX)
-                if (isFromCircleTouched) {
-                    fromThumbIndexX = event.x
-                    sliderFromProgress = getProgressValueByXCoordinates(fromThumbIndexX)
-                    onValidateThumbsPositions(true, false)
-                    progressListener?.onThumbMovement(sliderFromProgress, FROM_THUMB, true)
-                }
+                if (stepSize == DEFAULT_STEP_SIZE) {
+                    if (isFromCircleTouched) {
+                        fromThumbIndexX = event.x
+                        sliderFromProgress = getProgressValueByXCoordinates(fromThumbIndexX)
+                        onValidateThumbsPositions(true, false, RangeSliderDirection.PREVIOUS)
+                        progressListener?.onThumbMovement(sliderFromProgress, FROM_THUMB, true)
+                        prevThumbXPosition = fromThumbIndexX
+                    }
 
-                if (isToCircleTouched) {
-                    toThumbIndexX = event.x
-                    sliderToProgress = getProgressValueByXCoordinates(toThumbIndexX)
-                    onValidateThumbsPositions(false, true)
-                    progressListener?.onThumbMovement(sliderToProgress, TO_THUMB, true)
-                }
+                    if (isToCircleTouched) {
+                        toThumbIndexX = event.x
+                        sliderToProgress = getProgressValueByXCoordinates(toThumbIndexX)
+                        onValidateThumbsPositions(false, true, RangeSliderDirection.PREVIOUS)
+                        progressListener?.onThumbMovement(sliderToProgress, TO_THUMB, true)
+                        prevThumbXPosition = toThumbIndexX
+                    }
 
-                progressListener?.onRangeProgress(sliderFromProgress, sliderToProgress, true)
-                postInvalidate()
+                    progressListener?.onRangeProgress(sliderFromProgress, sliderToProgress, true)
+                    postInvalidate()
+                } else {
+                    val currentX = event.x
+                    val direction = getDirectionByXPosition(currentX, prevThumbXPosition)
+                    if (direction == RangeSliderDirection.NEXT) {
+                        if (currentX >= prevThumbXPosition) {
+                            // Moving to the right (next index)
+                            moveThumb(currentX, direction, event)
+                            prevThumbXPosition = currentX
+                        }
+                    } else {
+                        if (currentX <= prevThumbXPosition) {
+                            // Moving to the left (previous index)
+                            moveThumb(currentX, direction, event)
+                            prevThumbXPosition = currentX
+                        }
+                    }
+                }
 
                 return true
             }
@@ -218,7 +245,33 @@ class RangeSliderView: View {
         return eventValue
     }
 
-    private fun onValidateThumbsPositions(isFromValidation: Boolean, isToValidation: Boolean) {
+    private fun moveThumb(currentX: Float, direction: RangeSliderDirection, event: MotionEvent) {
+        val isFromCircleTouched = isCircleTouched(event, fromThumbIndexX)
+        val isToCircleTouched = isCircleTouched(event, toThumbIndexX)
+
+        if (isFromCircleTouched) {
+            fromThumbIndexX = currentX
+            sliderFromProgress = getProgressValueByXCoordinates(fromThumbIndexX)
+            onValidateThumbsPositions(true, false, direction)
+            progressListener?.onThumbMovement(sliderFromProgress, FROM_THUMB, true)
+        }
+
+        if (isToCircleTouched) {
+            toThumbIndexX = currentX
+            sliderToProgress = getProgressValueByXCoordinates(toThumbIndexX)
+            onValidateThumbsPositions(false, true, direction)
+            progressListener?.onThumbMovement(sliderToProgress, TO_THUMB, true)
+        }
+
+        progressListener?.onRangeProgress(sliderFromProgress, sliderToProgress, true)
+        postInvalidate()
+    }
+
+    private fun getDirectionByXPosition(currentX: Float, prevX: Float): RangeSliderDirection {
+        return if (currentX < prevX) RangeSliderDirection.PREVIOUS else RangeSliderDirection.NEXT
+    }
+
+    private fun onValidateThumbsPositions(isFromValidation: Boolean, isToValidation: Boolean, direction: RangeSliderDirection) {
         if (isFromValidation) {
             if (fromThumbIndexX >= toThumbIndexX) {
                 fromThumbIndexX = toThumbIndexX
@@ -226,6 +279,16 @@ class RangeSliderView: View {
 
             if (sliderFromProgress >= sliderToProgress) {
                 sliderFromProgress = sliderToProgress
+            }
+
+            if (sliderFromProgress <= sliderMinimumValue) {
+                sliderFromProgress = sliderMinimumValue
+            }
+
+            if (stepSize != DEFAULT_STEP_SIZE) {
+                val targetValue = getTargetValueByStepSize(if (direction == RangeSliderDirection.PREVIOUS) sliderFromProgress.toInt().toFloat() else sliderFromProgress, direction)
+                sliderFromProgress = targetValue ?: sliderFromProgress
+                fromThumbIndexX = getFromThumbIndex()
             }
         }
 
@@ -236,6 +299,16 @@ class RangeSliderView: View {
 
             if (sliderToProgress <= sliderFromProgress) {
                 sliderToProgress = sliderFromProgress
+            }
+
+            if (sliderToProgress >= sliderMaximumValue) {
+                sliderToProgress = sliderMaximumValue
+            }
+
+            if (stepSize != DEFAULT_STEP_SIZE) {
+                val targetValue = getTargetValueByStepSize(sliderToProgress, direction)
+                sliderToProgress = targetValue ?: sliderToProgress
+                toThumbIndexX = getToThumbIndex()
             }
         }
 
@@ -257,6 +330,7 @@ class RangeSliderView: View {
 
         return dx + dy < Math.pow(thumbSize.toDouble(), 2.0)
     }
+
 
     private fun getFromThumbIndex(): Float {
         // Calculate the width of the foreground rectangle based on progress percentage
@@ -416,6 +490,7 @@ class RangeSliderView: View {
         thumbSize = types.getDimension(R.styleable.RangeSliderView_thumb_size, DEFAULT_THUMB_SIZE)
         isThumbSingleColor = types.getBoolean(R.styleable.RangeSliderView_thumb_single_color, false)
 
+        stepSize = types.getFloat(R.styleable.RangeSliderView_slider_step_size, DEFAULT_STEP_SIZE)
         sliderFromProgress = types.getFloat(R.styleable.RangeSliderView_slider_from_progress, DEFAULT_SLIDER_FROM_PROGRESS)
         sliderToProgress = types.getFloat(R.styleable.RangeSliderView_slider_to_progress, DEFAULT_SLIDER_TO_PROGRESS)
 
@@ -434,12 +509,74 @@ class RangeSliderView: View {
         rectangleHeight = DEFAULT_RECTANGLE_HEIGHT
         thumbSize = DEFAULT_THUMB_SIZE
         isThumbSingleColor = false
+        stepSize = DEFAULT_STEP_SIZE
 
         sliderFromProgress = DEFAULT_SLIDER_FROM_PROGRESS
         sliderToProgress = DEFAULT_SLIDER_TO_PROGRESS
 
         sliderMinimumValue = DEFAULT_SLIDER_FROM_PROGRESS
         sliderMaximumValue = DEFAULT_SLIDER_TO_PROGRESS
+    }
+
+    /**
+     * We Will Split the Maximum Number to be a Steps by Step Size
+     * When the StepSize is not 1 that's mean we need to move in a steps
+     */
+    private fun getNumberOfValuesSteps(): List<Float> {
+        val result = mutableListOf<Float>()
+        var current = 0f
+
+        while (current < sliderMaximumValue) {
+            result.add(current)
+            current += stepSize
+        }
+
+        return result
+    }
+
+    private fun getTargetValueByStepSize(value: Float, direction: RangeSliderDirection): Float {
+        val lastIndex = sliderStepsIndexes.size - 1 // Get the index of the last item in the steps list
+
+        var nearest: Float? = null
+        var minDifference = Float.MAX_VALUE
+
+        for (i in sliderStepsIndexes.indices) {
+            val number = sliderStepsIndexes[i]
+            val difference = abs(value - number)
+
+            if (direction == RangeSliderDirection.NEXT) {
+                // Check if the current item is the last one and there is no next item
+                if (i == lastIndex && number <= value) {
+                    return sliderStepsIndexes[lastIndex]
+                }
+                // If not last item, proceed with normal processing
+                if (number > value && difference < minDifference) {
+                    nearest = number
+                    minDifference = difference
+                }
+            } else {
+                // If direction is PREVIOUS, proceed with normal processing
+                if (number < value && difference < minDifference) {
+                    nearest = number
+                    minDifference = difference
+                }
+            }
+        }
+
+        println("UIUI :: value: $value / direction: $direction / nearest:$nearest")
+        if (round(value) >= findLastValue() && direction == RangeSliderDirection.NEXT) {
+            return sliderMaximumValue
+        }
+
+        return nearest ?: value // Return the same value if no nearest value is found
+    }
+
+    private fun findLastValue(): Float {
+        var value = sliderMaximumValue
+        repeat(1) {
+            value -= stepSize
+        }
+        return value
     }
 
     fun onUpdateValues(fromValue: Float, toValue: Float) {
@@ -475,6 +612,10 @@ class RangeSliderView: View {
 
         fromThumbIndexX = getFromThumbIndex()
         toThumbIndexX = getToThumbIndex()
+
+        if (stepSize != DEFAULT_STEP_SIZE) {
+            sliderStepsIndexes = getNumberOfValuesSteps()
+        }
 
         invalidate()
     }

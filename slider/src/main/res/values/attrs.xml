@@ -6,6 +6,7 @@
         <attr name="corner_radius" format="dimension" />
         <attr name="rectangle_height" format="dimension" />
 
+        <attr name="slider_step_size" format="float" />
         <attr name="slider_from_progress" format="float" />
         <attr name="slider_to_progress" format="float" />
         <attr name="slider_min_value" format="float" />
