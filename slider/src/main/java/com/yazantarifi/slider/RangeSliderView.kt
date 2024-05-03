@@ -10,6 +10,24 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
+/**
+ * This RangeSlider Will Manage 2 Points of Progress Only
+ * 1. From Slider Value
+ * 2. To Slider Value
+ *
+ * This Custom View Will Take the Minimum and Maximum Values to the Slider
+ * Then We Can Change the Thumbs Positions Inside This Range
+ *
+ * If The Thumbs X Coordinates became outside the Range the CustomView Internally
+ * Will Arrange them to move them back to the Range, In case of Outside Update State
+ * For Example User Input Outside Slider Range
+ *
+ * Useful Functions To Use In This View
+ * 1, onUpdateValues -> Used to Update the Current Progress
+ * 2. onUpdateRangeValues -> Used to Update the Minimum and Maximum Slider Range
+ * 3. onAddRangeListener -> Used to Get the New Values When User Change the Progress
+ * 4. onClearViewInstances -> To Call Once ViewHolder in the RecyclerView DeAttached or Fragment View Destroyed to Clear The Instances
+ */
 class RangeSliderView: View {
 
     companion object {
@@ -81,6 +99,13 @@ class RangeSliderView: View {
         initViewAttributes(context, attrs)
     }
 
+    /**
+     * Main Entry Point for Variables Declaration In the Custom View
+     * 1. Sizes
+     * 2. Colors
+     * 3. Radius
+     * 4. Modes
+     */
     private fun initViewAttributes(context: Context, attrs: AttributeSet?) {
         if (attrs == null) {
             getDefaultViewAttributes(context)
@@ -89,6 +114,13 @@ class RangeSliderView: View {
         }
     }
 
+    /**
+     * Main Entry Point of Drawing the UI
+     * 1. We Draw the Disabled Background Color by the Height, width, Color
+     * 2. We Init The Thumbs by the Initial Flow or the Prev Selection Flow, if there is a Prev Selection
+     * 3. We Draw the Selected Line Between Thumbs Based on the Prev Step (Selected From, To Thumbs)
+     * 4. We Draw The Thumbs Positions By Selected Coordinates Calculated by User Progress Calculated in Step 2
+     */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -111,6 +143,9 @@ class RangeSliderView: View {
         }
     }
 
+    /**
+     * Declare The Thumbs Positions By User Input Progress From, To
+     */
     private fun onInitThumbsPositions() {
         if (fromThumbIndexX <= 0f) {
             fromThumbIndexX = getFromThumbIndex()
@@ -121,6 +156,13 @@ class RangeSliderView: View {
         }
     }
 
+    /**
+     * This Function Will Handle the Thumbs Movement
+     * 1. You Can Move Thumbs Within the Slider Range
+     * 2. You can Click on Any Area and The Slider Clicked Position Will Move the Correct Thumb
+     *
+     * Thumbs Movement Arragment Works on Both Modes and Each Update will notify the Screen by the Registered callback
+     */
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         val eventValue = super.onTouchEvent(event)
@@ -210,6 +252,10 @@ class RangeSliderView: View {
         }
     }
 
+    /**
+     * Decide The Touched X, Y Within the Range of the X Circle Coordinates
+     * This Function Used for From, To Thumbs
+     */
     private fun isCircleTouched(event: MotionEvent, circleX: Float): Boolean {
         val newXPosition = event.x
         val newYPosition = event.y
@@ -225,6 +271,15 @@ class RangeSliderView: View {
         return DEFAULT_PADDING_VALUE + getViewWidth() * ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue))
     }
 
+    private fun getToThumbIndex(): Float {
+        // Calculate the width of the foreground rectangle based on progress percentage
+        val maximumProgressIndex = (sliderToProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue) * 100
+        return getViewWidth() * (maximumProgressIndex / 100)
+    }
+
+    /**
+     * This Function Will Draw a Single Thumb Color if the single Color in Xml was True
+     */
     private fun onDrawSingleColorFromThumb(canvas: Canvas) {
         thumbColor?.let {
             thumbColor?.toArgb()?.let { fromThumbPaint.setColor(it) }
@@ -234,6 +289,10 @@ class RangeSliderView: View {
         canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize, fromThumbPaint)
     }
 
+    /**
+     * This Function Will Draw a Multiple Thumb Colors if the single Color in Xml was False
+     * This Will Draw a Nested Layers of the Thumb Color and Second Thumb Color
+     */
     private fun onDrawMultipleColorFromThumb(canvas: Canvas) {
         fromThumbSecondPaint?.let {
             thumbSecondColor?.toArgb()?.let { fromThumbSecondPaint.setColor(it) }
@@ -264,12 +323,10 @@ class RangeSliderView: View {
         canvas.drawCircle(fromThumbIndexX, getCenterPosition(), thumbSize - 10, fromThumbPaint)
     }
 
-    private fun getToThumbIndex(): Float {
-        // Calculate the width of the foreground rectangle based on progress percentage
-        val maximumProgressIndex = (sliderToProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue) * 100
-        return getViewWidth() * (maximumProgressIndex / 100)
-    }
-
+    /**
+     * This Function Will Draw a Multiple Thumb Colors if the single Color in Xml was False
+     * This Will Draw a Nested Layers of the Thumb Color and Second Thumb Color
+     */
     private fun onDrawMultipleColorToThumb(canvas: Canvas) {
 
         toThumbSecondPaint?.let {
@@ -302,6 +359,9 @@ class RangeSliderView: View {
 
     }
 
+    /**
+     * This Function Will Draw a Single Thumb Color if the single Color in Xml was True
+     */
     private fun onDrawSingleColorToThumb(canvas: Canvas) {
         thumbColor?.let {
             thumbColor?.toArgb()?.let { toThumbPaint.setColor(it) }
