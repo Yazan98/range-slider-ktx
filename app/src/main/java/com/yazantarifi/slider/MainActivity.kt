@@ -22,6 +22,32 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
+        binding.slider.let {
+            it.onUpdateRangeValues(0f, 100f)
+
+            binding.fromValue.setText(0f.toString())
+            binding.toValue.setText(100f.toString())
+
+            it.onAddRangeListener(object : RangeSliderListener {
+                override fun onRangeProgress(
+                    fromValue: Float,
+                    toValue: Float,
+                    isFromUser: Boolean
+                ) {
+                    if (isFromUser) {
+                        binding.fromValue.clearFocus()
+                        binding.toValue.clearFocus()
+
+                        binding.fromValue.setText(fromValue.toString())
+                        binding.toValue.setText(toValue.toString())
+                    }
+                }
+
+                override fun onThumbMovement(value: Float, thumbIndex: Int, isFromUser: Boolean) {
+
+                }
+            })
+        }
 
     }
 

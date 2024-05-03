@@ -20,6 +20,9 @@ class RangeSliderView: View {
         private const val DEFAULT_SLIDER_FROM_PROGRESS = 0f
         private const val DEFAULT_SLIDER_TO_PROGRESS = 100f
         private const val DEFAULT_PADDING_VALUE = 45f
+
+        const val FROM_THUMB = 0
+        const val TO_THUMB = 0
     }
 
     /**
@@ -39,6 +42,7 @@ class RangeSliderView: View {
     private var thumbSecondColor: Color? = null
     private var thumbSize: Float = 0f
     private var isThumbSingleColor: Boolean = false
+    private var progressListener: RangeSliderListener? = null
 
     /**
      * Background Color Rectangle Only Attributes
@@ -130,12 +134,17 @@ class RangeSliderView: View {
                     val newXPosition = event.x
                     if (newXPosition <= (getViewWidth() / 2)) {
                         fromThumbIndexX = newXPosition
+                        sliderFromProgress = getProgressValueByXCoordinates(fromThumbIndexX)
                     } else {
                         toThumbIndexX = newXPosition
+                        sliderToProgress = getProgressValueByXCoordinates(toThumbIndexX)
                     }
 
                     postInvalidate()
                 }
+
+                progressListener?.onRangeProgress(sliderFromProgress, sliderToProgress, true)
+
                 return true
             }
 
@@ -147,13 +156,17 @@ class RangeSliderView: View {
                     fromThumbIndexX = event.x
                     sliderFromProgress = getProgressValueByXCoordinates(fromThumbIndexX)
                     onValidateThumbsPositions(true, false)
+                    progressListener?.onThumbMovement(sliderFromProgress, FROM_THUMB, true)
                 }
 
                 if (isToCircleTouched) {
                     toThumbIndexX = event.x
                     sliderToProgress = getProgressValueByXCoordinates(toThumbIndexX)
                     onValidateThumbsPositions(false, true)
+                    progressListener?.onThumbMovement(sliderToProgress, TO_THUMB, true)
                 }
+
+                progressListener?.onRangeProgress(sliderFromProgress, sliderToProgress, true)
                 postInvalidate()
 
                 return true
@@ -375,6 +388,51 @@ class RangeSliderView: View {
 
         sliderMinimumValue = DEFAULT_SLIDER_FROM_PROGRESS
         sliderMaximumValue = DEFAULT_SLIDER_TO_PROGRESS
+    }
+
+    fun onUpdateValues(fromValue: Float, toValue: Float) {
+        if (fromValue <= sliderMinimumValue) {
+            sliderFromProgress = sliderMinimumValue
+        } else if (fromValue >= sliderMaximumValue) {
+            sliderFromProgress = sliderMaximumValue
+        } else {
+            sliderFromProgress = fromValue
+        }
+
+        if (toValue <= sliderMinimumValue) {
+            sliderToProgress = sliderMinimumValue
+        } else if (toValue >= sliderMaximumValue) {
+            sliderToProgress = sliderMaximumValue
+        } else {
+            sliderToProgress = fromValue
+        }
+
+        fromThumbIndexX = getFromThumbIndex()
+        toThumbIndexX = getToThumbIndex()
+
+        progressListener?.onRangeProgress(fromValue, toValue, false)
+        invalidate()
+    }
+
+    fun onUpdateRangeValues(minimumValue: Float, maximumValue: Float) {
+        this.sliderMinimumValue = minimumValue
+        this.sliderMaximumValue = maximumValue
+
+        this.sliderFromProgress = minimumValue
+        this.sliderToProgress = maximumValue
+
+        fromThumbIndexX = getFromThumbIndex()
+        toThumbIndexX = getToThumbIndex()
+
+        invalidate()
+    }
+
+    fun onAddRangeListener(listener: RangeSliderListener) {
+        progressListener = listener
+    }
+
+    fun onClearViewInstances() {
+        progressListener = null
     }
 
     private fun getCenterPosition(): Float {
