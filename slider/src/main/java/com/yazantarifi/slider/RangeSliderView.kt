@@ -29,6 +29,7 @@ import kotlin.math.round
  * 2. onUpdateRangeValues -> Used to Update the Minimum and Maximum Slider Range
  * 3. onAddRangeListener -> Used to Get the New Values When User Change the Progress
  * 4. onClearViewInstances -> To Call Once ViewHolder in the RecyclerView DeAttached or Fragment View Destroyed to Clear The Instances
+ * 5. onUpdateStepSize Update Slider Step Size
  */
 class RangeSliderView: View {
 
@@ -467,6 +468,9 @@ class RangeSliderView: View {
         canvas.drawPath(backgroundColorPath, backgroundColorPaint)
     }
 
+    /**
+     * Calculate the Progress Values When Moving Thumb by X Coordinates
+     */
     private fun getProgressValueByXCoordinates(x: Float): Float {
         // Calculate the percentage of the x coordinate relative to the width of the view
         val width = getViewWidth()
@@ -479,6 +483,9 @@ class RangeSliderView: View {
         return (percentage * range + sliderMinimumValue)
     }
 
+    /**
+     * Read the Values from Xml Attributes
+     */
     private fun getViewAttributes(context: Context, attrs: AttributeSet) {
         val types = context.obtainStyledAttributes(attrs, R.styleable.RangeSliderView, 0, 0)
         thumbColor = Color.valueOf(types.getColor(R.styleable.RangeSliderView_thumb_color, context.getColor(R.color.active_color)))
@@ -500,6 +507,9 @@ class RangeSliderView: View {
         types.recycle()
     }
 
+    /**
+     * Read Default Values In case Xml Attributes Missing or View Created Inside Code Directly
+     */
     private fun getDefaultViewAttributes(context: Context) {
         thumbSecondColor = Color.valueOf(context.getColor(R.color.background_color_screen))
         backgroundColor = Color.valueOf(context.getColor(R.color.background_color))
@@ -534,6 +544,18 @@ class RangeSliderView: View {
         return result
     }
 
+    /**
+     * This Function Will Search about the Neatest Step by the Step Size
+     * We have an Array of Values That Represent the Values By Step Size
+     * [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+     *
+     * Input Value 10 -> Next Movement Direction Will Fund 20
+     * Back Direction Will find 0
+     *
+     * Logic Related to The Max Value in case of Last Step and the Step Number is not Match the Max Value
+     * We Check if the Value has a Next Step but this Next Step does not Match a New Step AKA Decimal Points
+     * We Move it to the Last Index Whatever the Remaining Value is
+     */
     private fun getTargetValueByStepSize(value: Float, direction: RangeSliderDirection): Float {
         val lastIndex = sliderStepsIndexes.size - 1 // Get the index of the last item in the steps list
 
@@ -563,7 +585,6 @@ class RangeSliderView: View {
             }
         }
 
-        println("UIUI :: value: $value / direction: $direction / nearest:$nearest")
         if (round(value) >= findLastValue() && direction == RangeSliderDirection.NEXT) {
             return sliderMaximumValue
         }
@@ -571,6 +592,11 @@ class RangeSliderView: View {
         return nearest ?: value // Return the same value if no nearest value is found
     }
 
+    /**
+     * Logic Related to The Max Value in case of Last Step and the Step Number is not Match the Max Value
+     * We Check if the Value has a Next Step but this Next Step does not Match a New Step AKA Decimal Points
+     * We Move it to the Last Index Whatever the Remaining Value is
+     */
     private fun findLastValue(): Float {
         var value = sliderMaximumValue
         repeat(1) {
@@ -579,6 +605,10 @@ class RangeSliderView: View {
         return value
     }
 
+    /**
+     * Call This Function in case of User Input to Update the Slider Progress
+     * This Will Update the Slider Progress
+     */
     fun onUpdateValues(fromValue: Float, toValue: Float) {
         if (fromValue <= sliderMinimumValue) {
             sliderFromProgress = sliderMinimumValue
@@ -603,6 +633,11 @@ class RangeSliderView: View {
         invalidate()
     }
 
+    /**
+     * Initialization Function and The Starter Code Before do Anything
+     * Call This Function when you Setup the Slider
+     * This Will Add the Range from, To To the Slider
+     */
     fun onUpdateRangeValues(minimumValue: Float, maximumValue: Float) {
         this.sliderMinimumValue = minimumValue
         this.sliderMaximumValue = maximumValue
@@ -620,12 +655,58 @@ class RangeSliderView: View {
         invalidate()
     }
 
+    /**
+     * Initialization Step, Add the Step Size to The Slider in Lazy Load
+     * Use This Function if you want to Split the Slider into Sections
+     */
+    fun onUpdateStepSize(stepSize: Float) {
+        this.stepSize = stepSize
+        sliderStepsIndexes = getNumberOfValuesSteps()
+        invalidate()
+    }
+
+    /**
+     * Register The Function in case you need to get the New Progress Values
+     */
     fun onAddRangeListener(listener: RangeSliderListener) {
         progressListener = listener
     }
 
+    /**
+     * Call This Function when the View Destroyed
+     * 1. Fragment onViewDestroy
+     * 2. Activity onDestroy
+     * 3. RecyclerView when ViewHolder DeAttached from View
+     */
     fun onClearViewInstances() {
         progressListener = null
+        sliderStepsIndexes = arrayListOf()
+    }
+
+    /**
+     * Use This Function if you need to Update the Colors From Code or View Created Inside Code, Not Xml
+     */
+    fun onUpdateColors(
+        backgroundColor: Color,
+        activeColor: Color,
+        thumbColor: Color,
+        secondThumbColor: Color
+    ) {
+        this.backgroundColor = backgroundColor
+        this.thumbColor = thumbColor
+        this.thumbSecondColor = secondThumbColor
+        this.sliderActiveColor = activeColor
+        invalidate()
+    }
+
+    /**
+     * Use This Function if you need to Update the Thumb Size
+     * Input: isSingleColor to Check if the Thumbs Drawn in One Color Only or 2 Colors
+     */
+    fun onUpdateThumbInfo(thumbSize: Float, isSingleColor: Boolean) {
+        this.isThumbSingleColor = isSingleColor
+        this.thumbSize = thumbSize
+        invalidate()
     }
 
     fun getSliderFromValue(): Float {
