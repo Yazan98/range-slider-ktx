@@ -77,25 +77,25 @@ class RangeSliderView: View {
     private fun onDrawActiveProgressColors(canvas: Canvas) {
         val width = width.toFloat()
 
-        // remove All Prev Paths and Add New Rect Based on the New Coordinates
+        // Remove all previous paths and add new rectangle based on the new coordinates
         activeProgressColorPath.reset()
 
         // Calculate the progress percentage
-        val maximumProgressIndex = ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue)) * 100
+        val maximumProgressIndex = (sliderToProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue) * 100
 
         // Calculate the width of the foreground rectangle based on progress percentage
         val maximumProgressWidth = width * (maximumProgressIndex / 100)
+        val minimumProgressWidth = width * ((sliderFromProgress - sliderMinimumValue) / (sliderMaximumValue - sliderMinimumValue))
 
-        // Draw the New Active Color Coordinates Based on the Colors
-        activeProgressColorPath.addRoundRect(0f, 0f, maximumProgressWidth, rectangleHeight, backgroundRadius, backgroundRadius, Path.Direction.CW)
+        // Draw the new active color coordinates based on the colors
+        activeProgressColorPath.addRoundRect(minimumProgressWidth, 0f, maximumProgressWidth, rectangleHeight, backgroundRadius, backgroundRadius, Path.Direction.CW)
 
-        // Add The Active Color to the Paint Based on the Progress
+        // Add the active color to the Paint based on the progress
         sliderActiveColor?.toArgb()?.let { activeProgressColorPaint.setColor(it) }
         activeProgressColorPaint.style = Paint.Style.FILL
 
-        // Draw the Active Color By Ready Coordinates
+        // Draw the active color by ready coordinates
         canvas.drawPath(activeProgressColorPath, activeProgressColorPaint)
-
     }
 
     private fun onDrawBackgroundRectangle(canvas: Canvas) {
