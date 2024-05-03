@@ -239,14 +239,6 @@ class RangeSliderView: View {
             }
         }
 
-        if (sliderToProgress >= sliderMaximumValue) {
-            sliderToProgress = sliderMaximumValue
-        }
-
-        if (sliderFromProgress <= sliderMinimumValue) {
-            sliderFromProgress = sliderMinimumValue
-        }
-
         if (toThumbIndexX >= getViewWidth()) {
             toThumbIndexX = getViewWidth()
         }
@@ -464,7 +456,7 @@ class RangeSliderView: View {
         } else if (toValue >= sliderMaximumValue) {
             sliderToProgress = sliderMaximumValue
         } else {
-            sliderToProgress = fromValue
+            sliderToProgress = toValue
         }
 
         fromThumbIndexX = getFromThumbIndex()
@@ -493,6 +485,14 @@ class RangeSliderView: View {
 
     fun onClearViewInstances() {
         progressListener = null
+    }
+
+    fun getSliderFromValue(): Float {
+        return sliderFromProgress
+    }
+
+    fun getSliderToValue(): Float {
+        return sliderToProgress
     }
 
     private fun getCenterPosition(): Float {

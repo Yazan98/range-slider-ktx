@@ -9,6 +9,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import androidx.core.widget.doAfterTextChanged
 import com.yazantarifi.slider.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +28,18 @@ class MainActivity : AppCompatActivity() {
 
             binding.fromValue.setText(0f.toString())
             binding.toValue.setText(100f.toString())
+
+            binding.fromValue.doAfterTextChanged {
+                if (binding.fromValue.isFocused) {
+                    binding.slider.onUpdateValues(it.toString().toFloat(), binding.slider.getSliderToValue())
+                }
+            }
+
+            binding.toValue.doAfterTextChanged {
+                if (binding.toValue.isFocused) {
+                    binding.slider.onUpdateValues(binding.slider.getSliderFromValue(), it.toString().toFloat())
+                }
+            }
 
             it.onAddRangeListener(object : RangeSliderListener {
                 override fun onRangeProgress(
@@ -49,6 +62,11 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
+    }
+
+    override fun onDestroy() {
+        binding.slider.onClearViewInstances()
+        super.onDestroy()
     }
 
 }
