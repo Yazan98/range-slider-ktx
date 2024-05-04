@@ -100,6 +100,7 @@ binding.slider.let {
 | thumb_color          | Color Resource                | Thumb Color (The 2 Circles for Progress)        |
 | thumb_second_color   | Color Resource                | Second Thumb Color to Create Layers             |
 | thumb_single_color   | Boolean                       | To Draw the Thumbs With One Color or 2 Colors   |
+| slider_step_size     | Float                         | Steps Between Range to make Thumbs Jumping      |
 
 
 ## License
