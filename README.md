@@ -122,3 +122,8 @@ RangeSliderKTX is released under the MIT License. See LICENSE for details.
 ## Contributing
 Contributions are welcome! Please feel free to open issues or submit pull requests to help improve this project.
 
+## Commands to Publish
+```
+    ./gradlew build
+    ./gradlew slider:publishReleasePublicationToSonatypeRepository
+```
