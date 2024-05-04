@@ -19,6 +19,8 @@ RangeSliderKTX is a versatile and customizable Android library for implementing 
 
 <img width="339" alt="Screenshot 2024-05-04 at 1 03 18 PM" src="https://github.com/Yazan98/range-slider/assets/29167110/5aad22eb-6feb-4b23-a02e-7c28dbcdd52c">
 
+<img width="455" alt="Screenshot 2024-05-04 at 1 09 07 PM" src="https://github.com/Yazan98/range-slider/assets/29167110/73261889-b8ce-4b75-b10a-527ef81ab82d">
+
 ## Getting Started
 
 To get started with RangeSliderKTX, follow these steps:
@@ -82,6 +84,23 @@ binding.slider.let {
 ```
 
 > Note, The Included App in this Repo has 3 Examples
+
+## Slider Customization Attributes
+| Attribtes            | Value                         | Description                                     |
+|----------------------|-------------------------------|-------------------------------------------------|
+| rectangle_height     | Dimention Number (Dp, Sp, Px) | The Height of the Slider                        |
+| corner_radius        | Dimention Number (Dp, Sp, Px) | Corner Radius of the Slider Progress            |
+| slider_background    | Color Resource                | The Background Color of the Range behind Slider |
+| slider_active_color  | Color Resource                | The Active Color of the Progress Area           |
+| slider_from_progress | Float                         | Current From Thumb Progress Value               |
+| slider_to_progress   | Float                         | Current To Thumb Progress Value                 |
+| slider_min_value     | Float                         | Minimum Value of the Range                      |
+| slider_max_value     | Float                         | Maximum Value of the Range                      |
+| thumb_size           | Dimention Number (Dp, Sp, Px) | Thumb Size (The 2 Circles for Progress)         |
+| thumb_color          | Color Resource                | Thumb Color (The 2 Circles for Progress)        |
+| thumb_second_color   | Color Resource                | Second Thumb Color to Create Layers             |
+| thumb_single_color   | Boolean                       | To Draw the Thumbs With One Color or 2 Colors   |
+
 
 ## License
 RangeSliderKTX is released under the MIT License. See LICENSE for details.
