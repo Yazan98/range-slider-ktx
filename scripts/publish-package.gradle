@@ -52,7 +52,7 @@ afterEvaluate {
                 pom {
                     name = artifactId
                     description = POM_DESCRIPTION
-                    url = ''
+                    url = 'https://github.com/Yazan98/range-slider'
                     licenses {
                         license {
                             name = ''
