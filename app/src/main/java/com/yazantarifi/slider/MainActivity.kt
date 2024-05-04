@@ -31,6 +31,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SingleSingleActivity::class.java))
         }
 
+        binding.steps.setOnClickListener {
+            startActivity(Intent(this, StepsActivity::class.java))
+        }
+
     }
 
 

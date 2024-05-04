@@ -25,6 +25,7 @@
 
         <activity android:name=".SingleSliderActivity" />
         <activity android:name=".SingleSingleActivity" />
+        <activity android:name=".StepsActivity" />
     </application>
 
 </manifest>

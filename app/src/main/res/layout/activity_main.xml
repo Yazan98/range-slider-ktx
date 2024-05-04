@@ -27,6 +27,12 @@
             android:layout_height="wrap_content"
             android:text="Single Slider Single Color" />
 
+        <Button
+            android:id="@+id/steps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Slider With Steps" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
