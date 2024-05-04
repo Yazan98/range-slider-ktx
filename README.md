@@ -28,7 +28,14 @@ To get started with RangeSliderKTX, follow these steps:
 1. Add Dependency: Add the library dependency to your project's build.gradle file:
 
 ```
+    // Gradle
     implementation 'com.yazantarifi:range-slider:1.0.0'
+    
+    // Gradle Splitted Version
+    implementation group: 'com.yazantarifi', name: 'slider', version: '1.0.0'
+    
+    // Gradle KTX
+    implementation("com.yazantarifi:slider:1.0.0")
 ```
 
 2. Integrate into Layout: Integrate RangeSliderKTX into your layout XML file:
@@ -102,6 +109,10 @@ binding.slider.let {
 | thumb_single_color   | Boolean                       | To Draw the Thumbs With One Color or 2 Colors   |
 | slider_step_size     | Float                         | Steps Between Range to make Thumbs Jumping      |
 
+## Library Versions
+1. Library Version: 1.0.0
+2. Minimum Supported Version: 26
+3. Target Version: 34
 
 ## License
 RangeSliderKTX is released under the MIT License. See LICENSE for details.
