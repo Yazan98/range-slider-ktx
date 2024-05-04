@@ -14,6 +14,12 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -40,4 +46,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+apply {
+    from("${rootDir}/scripts/publish-package.gradle")
 }
