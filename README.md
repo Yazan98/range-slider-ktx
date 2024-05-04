@@ -109,6 +109,8 @@ binding.slider.let {
 | thumb_single_color   | Boolean                       | To Draw the Thumbs With One Color or 2 Colors   |
 | slider_step_size     | Float                         | Steps Between Range to make Thumbs Jumping      |
 
+> Note Anything Customizable from Xml has a Function to change it in Runtime (for Dynamic UIs, Api Response Colors)
+
 ## Library Versions
 1. Library Version: 1.0.0
 2. Minimum Supported Version: 26
