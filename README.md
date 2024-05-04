@@ -5,11 +5,11 @@ RangeSliderKTX is a versatile and customizable Android library for implementing 
 
 ## Features
 
-* Range Selection: Allow users to easily select a range of values by dragging two thumbs along a track.
-* Customizable Appearance: Customize the appearance of the slider, including track color, thumb color, and track height, to match your app's design.
-* Flexible Configuration: Configure the slider to work with various types of numeric ranges, including integers, floats, and dates.
-* Listener Support: Set listeners to receive updates when the range selection changes, enabling you to react to user interactions programmatically.
-* Easy Integration: Simple integration with your Android app using Gradle, with Kotlin extensions (KTX) for seamless development experience.
+* <strong>Range Selection</strong>: Allow users to easily select a range of values by dragging two thumbs along a track.
+* <strong>Customizable Appearance</strong>: Customize the appearance of the slider, including track color, thumb color, and track height, to match your app's design.
+* <strong>Flexible Configuration</strong>: Configure the slider to work with various types of numeric ranges, including integers, floats, and dates.
+* <strong>Listener Support</strong>: Set listeners to receive updates when the range selection changes, enabling you to react to user interactions programmatically.
+* <strong>Easy Integration</strong>: Simple integration with your Android app using Gradle, with Kotlin extensions (KTX) for seamless development experience.
 
 ## Slider Screenshots
 
@@ -81,7 +81,7 @@ binding.slider.let {
 
 ```
 
-> Note, The Included App in this Repo has 3 Examples 
+> Note, The Included App in this Repo has 3 Examples
 
 ## License
 RangeSliderKTX is released under the MIT License. See LICENSE for details.
