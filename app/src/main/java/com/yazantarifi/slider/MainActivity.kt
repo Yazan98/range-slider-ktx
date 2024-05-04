@@ -1,5 +1,6 @@
 package com.yazantarifi.slider
 
+import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
@@ -22,51 +23,15 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.singleMulti.setOnClickListener {
+            startActivity(Intent(this, SingleSliderActivity::class.java))
+        }
 
-        binding.slider.let {
-            it.onUpdateRangeValues(0f, 100f)
-
-            binding.fromValue.setText(0f.toString())
-            binding.toValue.setText(100f.toString())
-
-            binding.fromValue.doAfterTextChanged {
-                if (binding.fromValue.isFocused) {
-                    binding.slider.onUpdateValues(it.toString().toFloat(), binding.slider.getSliderToValue())
-                }
-            }
-
-            binding.toValue.doAfterTextChanged {
-                if (binding.toValue.isFocused) {
-                    binding.slider.onUpdateValues(binding.slider.getSliderFromValue(), it.toString().toFloat())
-                }
-            }
-
-            it.onAddRangeListener(object : RangeSliderListener {
-                override fun onRangeProgress(
-                    fromValue: Float,
-                    toValue: Float,
-                    isFromUser: Boolean
-                ) {
-                    if (isFromUser) {
-                        binding.fromValue.clearFocus()
-                        binding.toValue.clearFocus()
-
-                        binding.fromValue.setText(fromValue.toString())
-                        binding.toValue.setText(toValue.toString())
-                    }
-                }
-
-                override fun onThumbMovement(value: Float, thumbIndex: Int, isFromUser: Boolean) {
-
-                }
-            })
+        binding.singleSingle.setOnClickListener {
+            startActivity(Intent(this, SingleSingleActivity::class.java))
         }
 
     }
 
-    override fun onDestroy() {
-        binding.slider.onClearViewInstances()
-        super.onDestroy()
-    }
 
 }

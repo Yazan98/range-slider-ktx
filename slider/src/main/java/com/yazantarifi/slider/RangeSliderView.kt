@@ -29,7 +29,9 @@ import kotlin.math.round
  * 2. onUpdateRangeValues -> Used to Update the Minimum and Maximum Slider Range
  * 3. onAddRangeListener -> Used to Get the New Values When User Change the Progress
  * 4. onClearViewInstances -> To Call Once ViewHolder in the RecyclerView DeAttached or Fragment View Destroyed to Clear The Instances
- * 5. onUpdateStepSize Update Slider Step Size
+ * 5. onUpdateStepSize -> Update Slider Step Size
+ * 6. onUpdateColors -> To Update the Colors Inside the View
+ * 7. onUpdateThumbInfo -> Update the Thumb Size and Colors Mode
  */
 class RangeSliderView: View {
 
@@ -353,7 +355,7 @@ class RangeSliderView: View {
             fromThumbPaint.style = Paint.Style.FILL
         }
 
-        canvas.drawCircle(toThumbIndexX, getCenterPosition(), thumbSize, fromThumbPaint)
+        canvas.drawCircle(fromThumbIndexX, getCenterPosition(), thumbSize, fromThumbPaint)
     }
 
     /**

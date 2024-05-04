@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.yazantarifi.slider.RangeSliderView
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:id="@+id/slider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:rectangle_height="13dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        app:slider_from_progress="10"
+        app:slider_to_progress="80"
+        app:corner_radius="30dp"
+        app:thumb_size="15dp"
+        app:thumb_single_color="false"
+        app:thumb_color="@color/active_color"
+        app:thumb_second_color="@color/background_color_screen"
+        app:slider_min_value="0"
+        app:slider_max_value="100"
+        app:slider_active_color="@color/active_color"
+        app:slider_background="@color/background_color" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@+id/slider"
+        app:layout_constraintStart_toStartOf="@+id/slider"
+        app:layout_constraintTop_toBottomOf="@+id/slider">
+
+        <EditText
+            android:id="@+id/fromValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/slider"
+            app:layout_constraintTop_toBottomOf="@+id/slider" />
+
+        <EditText
+            android:id="@+id/toValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:layout_marginStart="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/slider"
+            app:layout_constraintTop_toBottomOf="@+id/slider" />
+
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
